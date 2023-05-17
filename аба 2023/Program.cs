@@ -229,11 +229,7 @@ class Program
 
         }
 
-
-
-
-
-
+    }
 
         static void Main(string[] args)
         {
@@ -244,82 +240,82 @@ class Program
 
             //buffering added
             /////////////////////////////////////////////////////////////////////////////////////////
-            
+
             while (!SetUp.On()) ;
             do
             {
-                if(Bad_except_catcher == true)
+                if (Bad_except_catcher == true)
                 {
                     Model.vRes_s = Model.vRes_s_buf; //откат до состояния получения команды
                     Bad_except_catcher = false;
                 }
                 else
                 {
-                    Model.vRes_s_buf = Model.vRes_s; 
+                    Model.vRes_s_buf = Model.vRes_s;
                     File.WriteAllLines(SetUp.Path, Model.vRes_s_buf);//сохранение модели
                     Bad_except_catcher = false;
 
                 }
 
 
-                    Console.WriteLine("Введите команду:");
-                    Command = Console.ReadLine();
+                Console.WriteLine("Введите команду:");
+                Command = Console.ReadLine();
 
-                    ////////////////////////////////////////////////////////////////////////////////////////
-                
-                    Commander test;
-                    try
+                ////////////////////////////////////////////////////////////////////////////////////////
+
+                Commander test;
+                try
+                {
+                    test = new Commander(Command);
+                }
+                catch (InvalidCommandFormat)
+                {
+                    Console.WriteLine("Недопустимая цепочка команд.");
+                    Bad_except_catcher = true;
+                }
+                finally
+                {
+                    test = new Commander(Command);
+                }
+                ////////////////////////////////////////////////////////////////////////////////////////
+
+
+                if (Bad_except_catcher == false)
+                {
+
+
+                    for (int i = 0; i < test.Cmd_cnt; i++)
                     {
-                        test = new Commander(Command);
-                    }
-                    catch (InvalidCommandFormat) 
-                    { 
-                        Console.WriteLine("Недопустимая цепочка команд.");
-                        Bad_except_catcher = true;
-                    }
-                    finally
-                    {
-                        test = new Commander(Command);
-                    }
-                    ////////////////////////////////////////////////////////////////////////////////////////
-
-
-                    if (Bad_except_catcher == false)
-                    {
-
-
-                        for (int i = 0; i < test.Cmd_cnt; i++)
+                        Single_command Sub_command = test.Single_command_returner(i);
+                        try
                         {
-                            Single_command Sub_command = test.Single_command_returner(i);
-                            try
+                            if (Sub_command.bdy == "REQUEST") Console.WriteLine(Model.Request());
+                            if (Sub_command.bdy == "OCCUPY")
                             {
-                                if (Sub_command.bdy == "REQUEST") Console.WriteLine(Model.Request());
-                                if (Sub_command.bdy == "OCCUPY")
-                                {
-                                    
-                                    Model.Occupy(Sub_command.prm);
-                                    Console.WriteLine("Ресурс стал занятым.");
-                                };
-                                if (Sub_command.bdy == "FREE")
-                                {
-                                    Model.Free(Sub_command.prm);
-                                    Console.WriteLine("Ресурс освобождён.");
-                                };
-                            }
-                            catch (OverflowException) { Console.WriteLine("Такого ресурса нет."); Bad_except_catcher = true; }
-                            catch (FormatException) { Console.WriteLine("Такого ресурса нет."); Bad_except_catcher = true; }
-                            catch (ResIdInvalid) { Console.WriteLine("Такого ресурса нет."); Bad_except_catcher = true; }
-                            catch (ResWasFree) { Console.WriteLine("Ресурс был свободен."); }
-                            catch (ResAreBusy) { Console.WriteLine("Все ресурсы заняты."); }
-                            catch (ResIsBusy) { Console.WriteLine("ресурс уже занят."); Bad_except_catcher = true; }
+
+                                Model.Occupy(Sub_command.prm);
+                                Console.WriteLine("Ресурс стал занятым.");
+                            };
+                            if (Sub_command.bdy == "FREE")
+                            {
+                                Model.Free(Sub_command.prm);
+                                Console.WriteLine("Ресурс освобождён.");
+                            };
                         }
+                        catch (OverflowException) { Console.WriteLine("Такого ресурса нет."); Bad_except_catcher = true; }
+                        catch (FormatException) { Console.WriteLine("Такого ресурса нет."); Bad_except_catcher = true; }
+                        catch (ResIdInvalid) { Console.WriteLine("Такого ресурса нет."); Bad_except_catcher = true; }
+                        catch (ResWasFree) { Console.WriteLine("Ресурс был свободен."); }
+                        catch (ResAreBusy) { Console.WriteLine("Все ресурсы заняты."); }
+                        catch (ResIsBusy) { Console.WriteLine("ресурс уже занят."); Bad_except_catcher = true; }
                     }
+                }
             }
             while (Command != "");
 
         }
 
+
     }
-}
 
 }
